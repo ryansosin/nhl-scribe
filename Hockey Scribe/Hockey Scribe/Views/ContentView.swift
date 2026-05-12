@@ -32,6 +32,10 @@ struct ContentView: View {
                     if let team = appState.currentTeam {
                         GoalHornView(team: team)
                     }
+                case .stickerAward:
+                    if let team = appState.currentTeam {
+                        StickerAwardView(team: team)
+                    }
                 case .goalieTracing:
                     if let team = appState.currentTeam,
                        let goalie = appState.currentGoalie {

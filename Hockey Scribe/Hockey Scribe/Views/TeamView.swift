@@ -29,7 +29,7 @@ struct TeamView: View {
                             .foregroundColor(team.secondarySwiftUIColor.opacity(0.6))
                     }
                 }
-                .frame(width: 280, height: 280)
+                .frame(width: 560, height: 560)
                 .scaleEffect(logoVisible ? 1.0 : 0.4)
                 .opacity(logoVisible ? 1.0 : 0)
                 .animation(.spring(response: 0.55, dampingFraction: 0.65), value: logoVisible)

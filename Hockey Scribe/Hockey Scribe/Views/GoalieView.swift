@@ -72,7 +72,7 @@ struct GoalieView: View {
             let (data, _) = try await URLSession.shared.data(from: url)
             let roster = try JSONDecoder().decode(RosterResponse.self, from: data)
             await MainActor.run {
-                goalies = Array(roster.goalies.prefix(3))
+                goalies = Array(roster.goalies.sorted { $0.sweaterNumber < $1.sweaterNumber }.prefix(3))
                 isLoading = false
             }
         } catch {
@@ -122,7 +122,7 @@ private struct GoalieCard: View {
                     Color.white.opacity(0.15)
                 }
             }
-            .frame(width: 200, height: 220)
+            .frame(width: 400, height: 440)
             .clipped()
 
             VStack(spacing: 2) {

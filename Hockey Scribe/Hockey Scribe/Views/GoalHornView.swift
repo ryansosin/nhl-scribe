@@ -19,10 +19,7 @@ struct GoalHornView: View {
 
                 if showNextButton {
                     Button("Next Team!") {
-                        appState.markCurrentTeamCompleted()
-                        appState.currentGoalie = nil
-                        appState.currentTeam = nil
-                        appState.sessionPhase = .home
+                        appState.sessionPhase = .stickerAward
                     }
                     .font(.system(size: 32, weight: .black, design: .rounded))
                     .foregroundColor(.black)
@@ -52,30 +49,32 @@ private struct YouTubePlayer: UIViewRepresentable {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
+        config.preferences.javaScriptEnabled = true
+        config.defaultWebpagePreferences.allowsContentJavaScript = true
 
         let web = WKWebView(frame: .zero, configuration: config)
-        web.backgroundColor = .black
         web.scrollView.isScrollEnabled = false
-        web.isOpaque = true
+        web.allowsLinkPreview = false
+        web.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
 
         let html = """
         <!DOCTYPE html>
         <html>
         <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <style>
-          * { margin:0; padding:0; background:#000; }
-          iframe { width:100vw; height:100vh; border:none; }
+          html, body { margin:0; padding:0; background:#000; width:100%; height:100%; overflow:hidden; }
+          iframe { position:fixed; top:0; left:0; width:100%; height:100%; border:none; }
         </style>
         </head>
         <body>
-        <iframe src="https://www.youtube.com/embed/\(videoID)?autoplay=1&playsinline=1&controls=0&rel=0&modestbranding=1"
-                allow="autoplay" allowfullscreen>
+        <iframe src="https://www.youtube-nocookie.com/embed/\(videoID)?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1"
+                allow="autoplay; fullscreen" allowfullscreen>
         </iframe>
         </body>
         </html>
         """
-        web.loadHTMLString(html, baseURL: URL(string: "https://www.youtube.com"))
+        web.loadHTMLString(html, baseURL: URL(string: "https://www.youtube-nocookie.com"))
         return web
     }
 

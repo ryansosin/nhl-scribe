@@ -20,13 +20,21 @@ struct CelebrationView: View {
                     .allowsHitTesting(false)
             }
 
-            VStack(spacing: 24) {
+            VStack(spacing: 16) {
                 Text("GOAL!")
                     .font(.system(size: 120, weight: .black, design: .rounded))
                     .foregroundColor(.yellow)
                     .shadow(color: .yellow.opacity(0.6), radius: 24, y: 0)
                     .scaleEffect(goalScale)
                     .opacity(goalOpacity)
+
+                if let snapshot = appState.tracingSnapshot {
+                    Image(uiImage: snapshot)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 2400, maxHeight: 1080)
+                        .opacity(goalOpacity)
+                }
 
                 Text("Amazing job, \(appState.childName)!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))

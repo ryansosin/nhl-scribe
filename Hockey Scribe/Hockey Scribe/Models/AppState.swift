@@ -1,8 +1,9 @@
 import Foundation
 import Combine
+import UIKit
 
 enum SessionPhase {
-    case home, teamIntro, tracing, celebration, goalie, goalieTracing, goalCelebration, goalHorn
+    case home, teamIntro, tracing, celebration, goalie, goalieTracing, goalCelebration, goalHorn, stickerAward
 }
 
 class AppState: ObservableObject {
@@ -23,6 +24,7 @@ class AppState: ObservableObject {
     @Published var currentTeam: NHLTeam?
     @Published var currentGoalie: Goalie?
     @Published var sessionPhase: SessionPhase = .home
+    @Published var tracingSnapshot: UIImage?
 
     // MARK: - Init
     init() {

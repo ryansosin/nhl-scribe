@@ -44,28 +44,31 @@ private struct StickerCell: View {
         VStack(spacing: 6) {
             ZStack {
                 if isCompleted {
-                    Circle()
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(team.primarySwiftUIColor)
                         .overlay(
-                            Circle()
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .strokeBorder(team.secondarySwiftUIColor, lineWidth: 3)
                         )
 
-                    Text(team.id)
-                        .font(.system(size: 13, weight: .black, design: .rounded))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.6), radius: 2)
+                    Image(team.logoAssetName)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(8)
                 } else {
-                    Circle()
-                        .fill(Color.white.opacity(0.08))
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
                         .overlay(
-                            Circle()
-                                .strokeBorder(Color.white.opacity(0.15), lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .strokeBorder(Color.white.opacity(0.12), lineWidth: 2)
                         )
 
-                    Text(team.id)
-                        .font(.system(size: 13, weight: .black, design: .rounded))
-                        .foregroundColor(.white.opacity(0.25))
+                    Image(team.logoAssetName)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(8)
+                        .colorMultiply(.white)
+                        .opacity(0.15)
                 }
             }
             .aspectRatio(1, contentMode: .fit)

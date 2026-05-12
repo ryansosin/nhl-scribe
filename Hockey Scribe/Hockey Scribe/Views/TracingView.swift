@@ -1,6 +1,7 @@
 import SwiftUI
 import PencilKit
 import AVFoundation
+import UIKit
 
 struct TracingView: View {
     @EnvironmentObject var appState: AppState
@@ -10,6 +11,7 @@ struct TracingView: View {
 
     @State private var currentIndex = 0
     @State private var drawing = PKDrawing()
+    @State private var strokeCountAtLetterStart = 0
     @State private var inactivityTimer: Timer?
     @State private var synthesizer = AVSpeechSynthesizer()
     @State private var completedIndices: Set<Int> = []
@@ -54,7 +56,7 @@ struct TracingView: View {
                     Image(team.logoAssetName)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 200, height: 200)
+                        .frame(width: 560, height: 560)
                         .padding(.top, 36)
                 }
 
@@ -109,19 +111,25 @@ struct TracingView: View {
     }
 
     private func checkCompletion() {
-        let totalPoints = drawing.strokes.reduce(0) { $0 + $1.path.count }
+        let newStrokes = drawing.strokes.dropFirst(strokeCountAtLetterStart)
+        let totalPoints = newStrokes.reduce(0) { $0 + $1.path.count }
         guard totalPoints > 20 else { return }
 
         inactivityTimer?.invalidate()
         speakPhonics(for: currentLetter)
         completedIndices.insert(currentIndex)
-        drawing = PKDrawing()
 
         let nextPhase: SessionPhase = appState.sessionPhase == .goalieTracing ? .goalCelebration : .celebration
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             if currentIndex + 1 < letters.count {
+                strokeCountAtLetterStart = drawing.strokes.count
                 currentIndex += 1
             } else {
+                let screenSize = UIScreen.main.bounds.size
+                appState.tracingSnapshot = drawing.image(
+                    from: CGRect(origin: .zero, size: screenSize),
+                    scale: UIScreen.main.scale
+                )
                 appState.sessionPhase = nextPhase
             }
         }
