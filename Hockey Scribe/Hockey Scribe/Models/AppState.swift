@@ -1,6 +1,10 @@
 import Foundation
 import Combine
 
+enum SessionPhase {
+    case home, teamIntro, tracing, celebration, goalie, goalieTracing, goalCelebration, goalHorn
+}
+
 class AppState: ObservableObject {
 
     // MARK: - Persisted
@@ -8,7 +12,6 @@ class AppState: ObservableObject {
         didSet { UserDefaults.standard.set(childName, forKey: "childName") }
     }
 
-    /// Set of team IDs (abbreviations) the child has completed
     @Published var completedTeamIDs: Set<String> {
         didSet {
             let array = Array(completedTeamIDs)
@@ -18,6 +21,8 @@ class AppState: ObservableObject {
 
     // MARK: - Session state
     @Published var currentTeam: NHLTeam?
+    @Published var currentGoalie: Goalie?
+    @Published var sessionPhase: SessionPhase = .home
 
     // MARK: - Init
     init() {
@@ -27,15 +32,14 @@ class AppState: ObservableObject {
     }
 
     // MARK: - Team selection
-    /// Picks the next random uncompleted team (reshuffles when all done).
     func pickNextTeam() {
         var pool = allNHLTeams.filter { !completedTeamIDs.contains($0.id) }
         if pool.isEmpty {
-            // All done — reset and start over
             completedTeamIDs = []
             pool = allNHLTeams
         }
         currentTeam = pool.randomElement()
+        sessionPhase = .teamIntro
     }
 
     func markCurrentTeamCompleted() {
