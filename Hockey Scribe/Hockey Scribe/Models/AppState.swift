@@ -3,7 +3,7 @@ import Combine
 import UIKit
 
 enum SessionPhase {
-    case home, teamIntro, tracing, celebration, goalie, goalieTracing, goalCelebration, goalHorn, stickerAward
+    case home, teamIntro, tracing, celebration, goalie, goalieTracing, goalCelebration, scorers, scorerTracing, scorerCelebration, goalHorn, stickerAward
 }
 
 class AppState: ObservableObject {
@@ -23,8 +23,10 @@ class AppState: ObservableObject {
     // MARK: - Session state
     @Published var currentTeam: NHLTeam?
     @Published var currentGoalie: Goalie?
+    @Published var currentSkater: Skater?
     @Published var sessionPhase: SessionPhase = .home
     @Published var tracingSnapshot: UIImage?
+    @Published var openStickerBookOnHome = false
 
     // MARK: - Init
     init() {
@@ -35,12 +37,26 @@ class AppState: ObservableObject {
 
     // MARK: - Team selection
     func pickNextTeam() {
-        var pool = allNHLTeams.filter { !completedTeamIDs.contains($0.id) }
-        if pool.isEmpty {
-            completedTeamIDs = []
-            pool = allNHLTeams
+        let nonDET = allNHLTeams.filter { $0.id != "DET" }
+        let det = allNHLTeams.first { $0.id == "DET" }
+
+        // All 31 non-DET teams done — play Red Wings as the finale
+        let nonDETRemaining = nonDET.filter { !completedTeamIDs.contains($0.id) }
+        if nonDETRemaining.isEmpty && !completedTeamIDs.contains("DET") {
+            currentTeam = det
+            sessionPhase = .teamIntro
+            return
         }
-        currentTeam = pool.randomElement()
+
+        // Full cycle complete — reset and start fresh (DET still goes last)
+        if nonDETRemaining.isEmpty {
+            completedTeamIDs = []
+            currentTeam = nonDET.randomElement()
+            sessionPhase = .teamIntro
+            return
+        }
+
+        currentTeam = nonDETRemaining.randomElement()
         sessionPhase = .teamIntro
     }
 

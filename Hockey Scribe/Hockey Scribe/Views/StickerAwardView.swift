@@ -9,6 +9,8 @@ struct StickerAwardView: View {
     @State private var glowRadius: CGFloat = 0
     @State private var labelOpacity: Double = 0
     @State private var shrinking = false
+    @State private var buttonsVisible = false
+    @State private var openStickerBook = false
 
     var body: some View {
         ZStack {
@@ -41,54 +43,74 @@ struct StickerAwardView: View {
                         .font(.system(size: 28, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.7))
                 }
-                .opacity(labelOpacity)
                 .scaleEffect(shrinking ? 0.5 : 1.0)
                 .opacity(shrinking ? 0 : labelOpacity)
 
                 Spacer()
 
-                Image(systemName: "books.vertical.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.yellow.opacity(shrinking ? 1.0 : 0.3))
-                    .scaleEffect(shrinking ? 1.4 : 1.0)
+                if buttonsVisible {
+                    VStack(spacing: 16) {
+                        Button(" See my stickers! ") {
+                            navigate(openStickerBook: true)
+                        }
+                        .font(.system(size: 32, weight: .black, design: .rounded))
+                        .foregroundColor(.black)
+                        .frame(width: 340, height: 84)
+                        .background(Color.yellow)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .shadow(color: .yellow.opacity(0.5), radius: 16, y: 6)
+
+                        Button("Keep playing!") {
+                            navigate(openStickerBook: false)
+                        }
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.7))
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                     .padding(.bottom, 48)
+                } else {
+                    Image(systemName: "books.vertical.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.yellow.opacity(0.3))
+                        .padding(.bottom, 48)
+                        .opacity(buttonsVisible ? 0 : 1)
+                }
             }
         }
         .onAppear { runAnimation() }
     }
 
+    private func navigate(openStickerBook: Bool) {
+        withAnimation(.easeIn(duration: 0.4)) {
+            shrinking = true
+            buttonsVisible = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            appState.markCurrentTeamCompleted()
+            appState.currentGoalie = nil
+            appState.currentTeam = nil
+            appState.tracingSnapshot = nil
+            appState.openStickerBookOnHome = openStickerBook
+            appState.sessionPhase = .home
+        }
+    }
+
     private func runAnimation() {
-        // Logo bounces in
         withAnimation(.spring(response: 0.5, dampingFraction: 0.55)) {
             logoScale = 1.0
             logoOpacity = 1.0
         }
-
-        // Glow pulses
         withAnimation(.easeInOut(duration: 0.8).delay(0.3)) {
             glowRadius = 30
         }
         withAnimation(.easeInOut(duration: 0.5).delay(1.1)) {
             glowRadius = 8
         }
-
-        // Label fades in
         withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
             labelOpacity = 1.0
         }
-
-        // Logo shrinks into the sticker book icon
-        withAnimation(.easeIn(duration: 0.5).delay(2.2)) {
-            shrinking = true
-        }
-
-        // Navigate home
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.9) {
-            appState.markCurrentTeamCompleted()
-            appState.currentGoalie = nil
-            appState.currentTeam = nil
-            appState.tracingSnapshot = nil
-            appState.sessionPhase = .home
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.6)) {
+            buttonsVisible = true
         }
     }
 }

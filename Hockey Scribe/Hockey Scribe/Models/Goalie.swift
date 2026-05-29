@@ -18,4 +18,13 @@ struct Goalie: Identifiable, Codable {
 
 struct RosterResponse: Codable {
     let goalies: [Goalie]
+    let forwards: [RosterPlayer]?
+    let defensemen: [RosterPlayer]?
+}
+
+/// Minimal roster entry used to look up sweater numbers for skaters whose
+/// stats come from a different endpoint (club-stats has points but no number).
+struct RosterPlayer: Codable {
+    let id: Int
+    let sweaterNumber: Int
 }

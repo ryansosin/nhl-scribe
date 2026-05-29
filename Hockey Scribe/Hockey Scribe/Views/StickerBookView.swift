@@ -28,8 +28,10 @@ struct StickerBookView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.yellow)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
                 }
             }
         }

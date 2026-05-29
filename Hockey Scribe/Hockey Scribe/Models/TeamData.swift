@@ -81,7 +81,8 @@ let allNHLTeams: [NHLTeam] = [
         nickname: "WINGS",
         primaryColor: "CE1126",
         secondaryColor: "FFFFFF",
-        youtubeVideoID: "dsUpffGEqj8"
+        youtubeVideoID: "PdHtlaOZ2gQ",
+        youtubeStartTime: 22
     ),
     NHLTeam(
         id: "EDM",

@@ -6,33 +6,46 @@ struct GoalHornView: View {
     let team: NHLTeam
 
     @State private var showNextButton = false
+    @State private var startupOverlay = true
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            YouTubePlayer(videoID: team.youtubeVideoID)
+            YouTubePlayer(videoID: team.youtubeVideoID, startTime: team.youtubeStartTime)
                 .ignoresSafeArea()
 
-            VStack {
-                Spacer()
+            // Swallow taps so they can't reach the iframe and trigger pause/controls.
+            Color.black.opacity(0.001)
+                .ignoresSafeArea()
+                .allowsHitTesting(true)
 
-                if showNextButton {
-                    Button("Next Team!") {
-                        appState.sessionPhase = .stickerAward
-                    }
-                    .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundColor(.black)
-                    .frame(width: 280, height: 84)
-                    .background(Color.yellow)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .shadow(color: .yellow.opacity(0.5), radius: 16, y: 6)
-                    .padding(.bottom, 48)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            // Hide YouTube's startup overlay until the video is playing.
+            Color.black
+                .ignoresSafeArea()
+                .opacity(startupOverlay ? 1 : 0)
+                .animation(.easeOut(duration: 0.4), value: startupOverlay)
+                .allowsHitTesting(false)
+        }
+        .safeAreaInset(edge: .bottom) {
+            if showNextButton {
+                Button("Get your sticker!") {
+                    appState.sessionPhase = .stickerAward
                 }
+                .font(.system(size: 32, weight: .black, design: .rounded))
+                .foregroundColor(.black)
+                .frame(width: 280, height: 84)
+                .background(Color.yellow)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .shadow(color: .yellow.opacity(0.5), radius: 16, y: 6)
+                .padding(.bottom, 20)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                startupOverlay = false
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                     showNextButton = true
@@ -44,12 +57,12 @@ struct GoalHornView: View {
 
 private struct YouTubePlayer: UIViewRepresentable {
     let videoID: String
+    let startTime: Int
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
-        config.preferences.javaScriptEnabled = true
         config.defaultWebpagePreferences.allowsContentJavaScript = true
 
         let web = WKWebView(frame: .zero, configuration: config)
@@ -68,7 +81,7 @@ private struct YouTubePlayer: UIViewRepresentable {
         </style>
         </head>
         <body>
-        <iframe src="https://www.youtube-nocookie.com/embed/\(videoID)?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1"
+        <iframe src="https://www.youtube-nocookie.com/embed/\(videoID)?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&controls=0&start=\(startTime)"
                 allow="autoplay; fullscreen" allowfullscreen>
         </iframe>
         </body>

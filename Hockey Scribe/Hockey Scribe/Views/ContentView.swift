@@ -20,13 +20,17 @@ struct ContentView: View {
                     if let team = appState.currentTeam {
                         TracingView(team: team, word: team.nickname)
                     }
-                case .celebration, .goalCelebration:
+                case .celebration, .goalCelebration, .scorerCelebration:
                     if let team = appState.currentTeam {
                         CelebrationView(team: team)
                     }
                 case .goalie:
                     if let team = appState.currentTeam {
                         GoalieView(team: team)
+                    }
+                case .scorers:
+                    if let team = appState.currentTeam {
+                        ScorersView(team: team)
                     }
                 case .goalHorn:
                     if let team = appState.currentTeam {
@@ -40,6 +44,11 @@ struct ContentView: View {
                     if let team = appState.currentTeam,
                        let goalie = appState.currentGoalie {
                         TracingView(team: team, word: goalie.lastName.default.uppercased(), headerImageURL: goalie.actionShotURL)
+                    }
+                case .scorerTracing:
+                    if let team = appState.currentTeam,
+                       let skater = appState.currentSkater {
+                        TracingView(team: team, word: skater.lastName.default.uppercased(), headerImageURL: skater.actionShotURL)
                     }
                 }
             }

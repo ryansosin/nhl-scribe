@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
     @State private var showStickerBook = false
+    @State private var showDevMenu = false
 
     var body: some View {
         ZStack {
@@ -55,10 +56,45 @@ struct HomeView: View {
                     .foregroundColor(.white.opacity(0.5))
                     .padding(.bottom, 24)
             }
+
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: { showDevMenu = true }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 22))
+                            .foregroundColor(.white.opacity(0.2))
+                            .padding(20)
+                    }
+                }
+                Spacer()
+            }
         }
         .sheet(isPresented: $showStickerBook) {
             StickerBookView()
                 .environmentObject(appState)
+        }
+        .onReceive(appState.$openStickerBookOnHome) { shouldOpen in
+            if shouldOpen {
+                showStickerBook = true
+                appState.openStickerBookOnHome = false
+            }
+        }
+        .alert("Developer Menu", isPresented: $showDevMenu) {
+            Button("Reset App", role: .destructive) {
+                UserDefaults.standard.removeObject(forKey: "childName")
+                UserDefaults.standard.removeObject(forKey: "completedTeamIDs")
+                appState.childName = ""
+                appState.completedTeamIDs = []
+                appState.sessionPhase = .home
+            }
+            Button("Complete 31 Teams") {
+                let ids = Set(allNHLTeams.filter { $0.id != "DET" }.map(\.id))
+                appState.completedTeamIDs = ids
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Choose an option")
         }
     }
 }

@@ -10,7 +10,7 @@ struct PencilKitCanvas: UIViewRepresentable {
         canvas.backgroundColor = .clear
         canvas.isOpaque = false
         canvas.drawingPolicy = .anyInput
-        canvas.tool = PKInkingTool(.marker, color: UIColor.white.withAlphaComponent(0.75), width: 25)
+        canvas.tool = PKInkingTool(.marker, color: UIColor.white.withAlphaComponent(0.75), width: 15)
         canvas.delegate = context.coordinator
         return canvas
     }

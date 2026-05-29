@@ -9,49 +9,49 @@ struct CelebrationView: View {
     @State private var goalOpacity: Double = 0
     @State private var showConfetti = false
     @State private var synthesizer = AVSpeechSynthesizer()
+    @State private var autoAdvanceWork: DispatchWorkItem?
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            team.primarySwiftUIColor.ignoresSafeArea()
 
             if showConfetti {
-                ConfettiLayer(primary: team.primarySwiftUIColor, secondary: team.secondarySwiftUIColor)
+                ConfettiLayer(primary: team.secondarySwiftUIColor, secondary: .white)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
 
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
+                Spacer()
+
                 Text("GOAL!")
                     .font(.system(size: 120, weight: .black, design: .rounded))
-                    .foregroundColor(.yellow)
-                    .shadow(color: .yellow.opacity(0.6), radius: 24, y: 0)
+                    .foregroundColor(team.secondarySwiftUIColor)
+                    .shadow(color: team.secondarySwiftUIColor.opacity(0.6), radius: 24, y: 0)
                     .scaleEffect(goalScale)
                     .opacity(goalOpacity)
+
+                Spacer().frame(height: 24)
 
                 if let snapshot = appState.tracingSnapshot {
                     Image(uiImage: snapshot)
                         .resizable()
                         .scaledToFit()
-                        .frame(maxWidth: 2400, maxHeight: 1080)
+                        .frame(maxWidth: .infinity, maxHeight: 640)
+                        .padding(.horizontal, 32)
                         .opacity(goalOpacity)
                 }
 
-                Text("Amazing job, \(appState.childName)!")
+                Spacer().frame(height: 20)
+
+                Text(celebrationLine)
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
                     .opacity(goalOpacity)
-            }
 
-            VStack {
                 Spacer()
-                Button("Keep going!") { advance() }
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.black)
-                    .frame(width: 260, height: 72)
-                    .background(Color.yellow)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .opacity(goalOpacity)
-                    .padding(.bottom, 48)
             }
         }
         .onAppear {
@@ -61,9 +61,12 @@ struct CelebrationView: View {
                 goalOpacity = 1.0
             }
             speakCelebration()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { advance() }
+            let work = DispatchWorkItem { advance() }
+            autoAdvanceWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5, execute: work)
         }
         .onDisappear {
+            autoAdvanceWork?.cancel()
             synthesizer.stopSpeaking(at: .immediate)
         }
     }
@@ -72,13 +75,26 @@ struct CelebrationView: View {
         switch appState.sessionPhase {
         case .celebration:
             appState.sessionPhase = .goalie
+        case .goalCelebration:
+            appState.sessionPhase = .scorers
         default:
             appState.sessionPhase = .goalHorn
         }
     }
 
+    private var celebrationLine: String {
+        switch appState.sessionPhase {
+        case .goalCelebration:
+            return "Kick save by \(appState.childName), and a beauty!"
+        case .scorerCelebration:
+            return "Top shelf by \(appState.childName), what a snipe!"
+        default:
+            return "Shot by \(appState.childName), he scores!"
+        }
+    }
+
     private func speakCelebration() {
-        let utterance = AVSpeechUtterance(string: "Amazing job, \(appState.childName)!")
+        let utterance = AVSpeechUtterance(string: celebrationLine)
         utterance.rate = 0.44
         utterance.pitchMultiplier = 1.25
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")

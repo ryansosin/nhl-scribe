@@ -7,6 +7,7 @@ struct NHLTeam: Identifiable, Codable {
     let primaryColor: String   // hex string
     let secondaryColor: String // hex string
     let youtubeVideoID: String // goal horn YouTube video ID
+    var youtubeStartTime: Int = 0  // seconds offset into video
 
     var logoAssetName: String { "logo_\(id)" }
 }
